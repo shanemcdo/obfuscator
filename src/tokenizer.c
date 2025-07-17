@@ -9,8 +9,9 @@ typedef enum {
 	NEWLINE,
 	START,
 	IDENT,
-	NUMBER,
 	NUMBER_OP,
+	INT,
+	FLOAT,
 	STRING,
 	STRING_ESCAPE,
 	COMMENT,
@@ -97,15 +98,15 @@ int get_tokens(int *out_len, char ***out_array) {
 				token[token_index++] = ch;
 				state = STRING;
 				break;
-			case '0'...'9':
-				token[token_index++] = ch;
-				state = NUMBER;
 				break;
 			case '-':
 			case '+':
 				token[token_index++] = ch;
 				state = NUMBER_OP;
 				break;
+			case '0'...'9':
+				token[token_index++] = ch;
+				state = INT;
 			case '\r':
 			case '\n':
 				state = NEWLINE;
@@ -134,9 +135,31 @@ int get_tokens(int *out_len, char ***out_array) {
 				break;
 			}
 			break;
-		case NUMBER:
-			break;
 		case NUMBER_OP:
+			if(ch >= '0' && ch <= '9') {
+				token[token_index++] = ch;
+				break;
+			}
+			if(
+				(token[0] == '+' && ch == '+') ||
+				(token[0] == '-' && (
+					ch == '>' ||
+					ch == '-'
+				))
+			){
+				token[token_index++] = ch;
+			}else if(ch != EOF){
+				CHECK_UNGETC(ch);
+			}
+			(*out_array)[array_index] = strdup(token);
+			if((*out_array)[array_index++] == NULL) return ERR_MEM;
+			bzero(token, sizeof(token) / sizeof(*token));
+			token_index = 0;
+			state = START;
+			break;
+		case INT:
+			break;
+		case FLOAT:
 			break;
 		case STRING:
 			break;
