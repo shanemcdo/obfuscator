@@ -90,6 +90,9 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				token[token_index++] = ch;
 				state = COMMENT;
 				break;
+			case '\r':
+			case '\n':
+				state = NEWLINE;
 			case '~':
 			case '}':
 			case '{':
@@ -145,10 +148,6 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			case '0'...'9':
 				token[token_index++] = ch;
 				state = INT;
-				break;
-			case '\r':
-			case '\n':
-				state = NEWLINE;
 				break;
 			case ' ':
 			case '\t':

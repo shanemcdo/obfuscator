@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<stdbool.h>
 #include"tokenizer.h"
 #include"id_gens.h"
 
@@ -40,6 +41,7 @@ int main(int argc, char **argv){
 
 	for(int i = 0; i < size; i++) {
 		// printf("%d: '%s'\n", i, tokens[i]);
+		if(tokens[i][0] == '\n' || tokens[i][0] == '\r') continue;
 		int index = find(tokens[i], unique, size);
 		if(index == -1) {
 			unique[new_ids_index] = tokens[i];
@@ -57,15 +59,16 @@ int main(int argc, char **argv){
 		printf("#define %s %s\n", new_ids[i], unique[i]);
 	}
 
-	int line_length = 0;
+	bool newline = true;
 	for(int i = 0; i < size; i++) {
+		if(tokens[i][0] == '\n' || tokens[i][0] == '\r') {
+			putchar('\n');
+			continue;
+		}
 		int index = find(tokens[i], unique, size);
 		if(index < 0) return 3;
-		line_length += printf("%s%s", line_length == 0 ? "" : " ", new_ids[index]);
-		if(line_length >= 40) {
-			line_length = 0;
-			putchar('\n');
-		}
+		printf("%s%s", newline ? "" : " ", new_ids[index]);
+		newline = false;
 	}
 
 	for(int i = 0; i < size; i++) {
