@@ -16,7 +16,7 @@ int main(int argc, char **argv){
 		return result;
 	}
 	for(int i = 0; i < size; i++) {
-		printf("%d: %s\n", i, tokens[i]);
+		printf("%d: '%s'\n", i, tokens[i]);
 	}
 
     return 0;
