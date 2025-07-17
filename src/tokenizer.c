@@ -7,6 +7,7 @@
 
 // TODO: KNOWN BUG: Macros will not work correcty when there are #ifdefs in the code
 // TODO: KNOWN BUG: Name collisions can occur with already existing names in #define macros
+// TODO: KNOWN BUG: Function-like macros will not work because there cannot be a space between name and PAREN
 
 typedef enum {
 	NEWLINE,
