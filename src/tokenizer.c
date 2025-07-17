@@ -5,6 +5,9 @@
 
 #define MAX_TOKEN_SIZE 100
 
+// TODO: KNOWN BUG: Macros will not work correcty when there are #ifdefs in the code
+// TODO: KNOWN BUG: Name collisions can occur with already existing names in #define macros
+
 typedef enum {
 	NEWLINE,
 	START,
@@ -17,6 +20,7 @@ typedef enum {
 	STRING_ESCAPE,
 	CHAR,
 	CHAR_ESCAPE,
+	MACRO,
 	COMMENT,
 	MULTILINE_COMMENT,
 	MULTILINE_COMMENT_END,
@@ -37,19 +41,21 @@ typedef enum {
 // 5 - ungetc error
 #define ERR_UGC 5
 #define CHECK_UNGETC(ch) ({ if(ungetc(ch, stdin) == EOF) return ERR_UGC; })
-int get_tokens(int *out_len, char ***out_array) {
-	if(out_array == NULL || out_len == NULL) return ERR_NUL;
+int get_tokens(int *out_len, char ***out_array, char **out_macros) {
+	if(out_array == NULL || out_len == NULL || out_macros == NULL) return ERR_NUL;
 	if(*out_array == NULL) {
 		*out_len = 20;
-		*out_array = calloc(sizeof(*out_array), *out_len);
+		*out_array = calloc(*out_len, sizeof(*out_array));
 		if(*out_array == NULL) return ERR_MEM;
 	}
+	int macros_cap = 100;
+	*out_macros = calloc(macros_cap, sizeof(**out_macros));
 	State state = NEWLINE;
-	int prev;
 	char token[MAX_TOKEN_SIZE + 1];
 	bzero(token, sizeof(token) / sizeof(*token));
 	int token_index = 0;
 	int array_index = 0;
+	int macros_index = 0;
 	while(1) {
 		if(token_index > MAX_TOKEN_SIZE) return ERR_TOK;
 		int ch = getchar();
@@ -62,7 +68,8 @@ int get_tokens(int *out_len, char ***out_array) {
 				break;
 			case '#':
 				// TODO: handle saving these lines
-				state = IGNORE_LINE;
+				(*out_macros)[macros_index++] = ch;
+				state = MACRO;
 				break;
 			case ' ':
 			case '\t':
@@ -301,6 +308,18 @@ int get_tokens(int *out_len, char ***out_array) {
 				break;
 			}
 			break;
+		case MACRO:
+			switch(ch){
+			case EOF:
+				break;
+			case '\n':
+			case '\r':
+				state = NEWLINE;
+			default:
+				(*out_macros)[macros_index++] = ch;
+				break;
+			}
+			break;
 		case COMMENT:
 			switch(ch){
 			case EOF:
@@ -353,16 +372,23 @@ int get_tokens(int *out_len, char ***out_array) {
 			}
 			break;
 		}
-		prev = ch;
 		if(ch == EOF) break;
 		if(array_index == *out_len) {
 			*out_len *= 2;
 			*out_array = realloc(*out_array, sizeof(*out_array) * *out_len);
 			if(*out_array == NULL) return ERR_MEM;
 		}
+		if(macros_index + 1 >= macros_cap) {
+			macros_cap *= 2;
+			*out_macros = realloc(*out_macros, sizeof(*out_macros) * macros_cap);
+			if(*out_array == NULL) return ERR_MEM;
+		}
 	}
 	*out_len = array_index;
-	*out_array = realloc(*out_array, sizeof(*out_array) * *out_len);
+	*out_array = realloc(*out_array, sizeof(**out_array) * *out_len);
 	if(*out_array == NULL) return ERR_MEM;
+	*out_macros = realloc(*out_macros, sizeof(**out_macros) * macros_index);
+	if(*out_macros == NULL) return ERR_MEM;
+	(*out_macros)[macros_index] = '\0';
 	return SUCCESS;
 }

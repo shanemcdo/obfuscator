@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 #include"tokenizer.h"
 
 int main(int argc, char **argv){
@@ -8,13 +9,15 @@ int main(int argc, char **argv){
 			return 1;
 		}
 	}
-	char **tokens = NULL;
 	int size = 0;
-	int result = get_tokens(&size, &tokens);
+	char **tokens = NULL;
+	char *macros = NULL;
+	int result = get_tokens(&size, &tokens, &macros);
 	if(result != 0) {
 		fprintf(stderr, "Fatal Error: Couldn't get tokens. Error code: %d\n", result);
 		return result;
 	}
+	printf("macros: %lu\n%s", strlen(macros), macros);
 	for(int i = 0; i < size; i++) {
 		printf("%d: '%s'\n", i, tokens[i]);
 	}
