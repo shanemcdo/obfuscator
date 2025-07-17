@@ -149,6 +149,14 @@ int get_tokens(int *out_len, char ***out_array) {
 		}
 		prev = ch;
 		if(ch == EOF) break;
+		if(array_index == *out_len) {
+			*out_len *= 2;
+			*out_array = realloc(*out_array, sizeof(*out_array) * *out_len);
+			if(*out_array == NULL) return ERR_MEM;
+		}
 	}
+	*out_len = array_index;
+	*out_array = realloc(*out_array, sizeof(*out_array) * *out_len);
+	if(*out_array == NULL) return ERR_MEM;
 	return SUCCESS;
 }
