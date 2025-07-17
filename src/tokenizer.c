@@ -103,7 +103,7 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				token[token_index] = ch;
 				(*out_array)[array_index] = strdup(token);
 				if((*out_array)[array_index++] == NULL) return ERR_MEM;
-				token[token_index++] = '\0';
+				token[token_index] = '\0';
 				break;
 			case 'a'...'z':
 			case 'A'...'Z':
