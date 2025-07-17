@@ -67,7 +67,6 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				state = COMMENT;
 				break;
 			case '#':
-				// TODO: handle saving these lines
 				(*out_macros)[macros_index++] = ch;
 				state = MACRO;
 				break;
