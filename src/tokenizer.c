@@ -55,6 +55,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case NEWLINE:
 			switch(ch){
 			case '/':
+				token[token_index++] = ch;
 				state = COMMENT;
 				break;
 			case '#':
@@ -75,13 +76,16 @@ int get_tokens(int *out_len, char ***out_array) {
 			break;
 		case START:
 			switch(ch){
+			case '/':
+				token[token_index++] = ch;
+				state = COMMENT;
+				break;
 			case '~':
 			case '|':
 			case '}':
 			case '{':
 			case ']':
 			case '[':
-			case '/':
 			case ',':
 			case '(':
 			case ')':
@@ -269,8 +273,29 @@ int get_tokens(int *out_len, char ***out_array) {
 			}
 			break;
 		case COMMENT:
+			switch(ch){
+			case '/':
+				state = IGNORE_LINE;
+				break;
+			default:
+				CHECK_UNGETC(ch);
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			}
 			break;
 		case IGNORE_LINE:
+			switch(ch){
+			case EOF:
+				break;
+			case '\r':
+			case '\n':
+				state = NEWLINE;
+				break;
+			}
 			break;
 		}
 		prev = ch;
