@@ -207,8 +207,33 @@ int get_tokens(int *out_len, char ***out_array) {
 			}
 			break;
 		case STRING:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			case '"':
+				token[token_index++] = ch;
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			case '\\':
+				state = STRING_ESCAPE;
+			default:
+				token[token_index++] = ch;
+				break;
+			}
 			break;
 		case STRING_ESCAPE:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			default:
+				token[token_index++] = ch;
+				state = STRING;
+				break;
+			}
 			break;
 		case COMMENT:
 			break;
