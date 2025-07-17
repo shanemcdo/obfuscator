@@ -52,10 +52,15 @@ int main(int argc, char **argv){
 		printf("#define %s %s\n", new_ids[i], unique[i]);
 	}
 
+	int line_length = 0;
 	for(int i = 0; i < size; i++) {
 		int index = find(tokens[i], unique, size);
 		if(index < 0) return 3;
-		printf("%s%s", i == 0 ? "" : " ", new_ids[index]);
+		line_length += printf("%s%s", line_length == 0 ? "" : " ", new_ids[index]);
+		if(line_length >= 40) {
+			line_length = 0;
+			putchar('\n');
+		}
 	}
 
 	for(int i = 0; i < size; i++) {
