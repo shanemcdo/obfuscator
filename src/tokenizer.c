@@ -20,6 +20,7 @@ typedef enum {
 	MULTILINE_COMMENT,
 	MULTILINE_COMMENT_END,
 	IGNORE_LINE,
+	// TODO: handle more operators
 } State;
 
 // return 0 if success
