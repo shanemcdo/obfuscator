@@ -9,6 +9,7 @@ typedef enum {
 	NEWLINE,
 	START,
 	IDENT,
+	CMP_OP,
 	NUMBER_OP,
 	INT,
 	FLOAT,
@@ -20,7 +21,6 @@ typedef enum {
 	MULTILINE_COMMENT,
 	MULTILINE_COMMENT_END,
 	IGNORE_LINE,
-	// TODO: handle more operators
 } State;
 
 // return 0 if success
@@ -56,7 +56,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		switch(state){
 		case NEWLINE:
 			switch(ch){
-			case '/':
+			case '/': // TODO: might be unneccisary
 				token[token_index++] = ch;
 				state = COMMENT;
 				break;
@@ -111,6 +111,13 @@ int get_tokens(int *out_len, char ***out_array) {
 				token[token_index++] = ch;
 				state = CHAR;
 				break;
+			case '=':
+			case '>':
+			case '<':
+			case '!':
+				token[token_index++] = ch;
+				state = CMP_OP;
+				break;
 			case '-':
 			case '+':
 				token[token_index++] = ch;
@@ -124,7 +131,11 @@ int get_tokens(int *out_len, char ***out_array) {
 			case '\n':
 				state = NEWLINE;
 				break;
+			case ' ':
+			case '\t':
+				break;
 			case '$':
+			default:
 				return ERR_PAR;
 			}
 			break;
@@ -136,7 +147,7 @@ int get_tokens(int *out_len, char ***out_array) {
 			case '0'...'9':
 				token[token_index++] = ch;
 				break;
-			case EOF:
+			case EOF: // TODO: might be unnecessiary
 				break;
 			default:
 				CHECK_UNGETC(ch);
@@ -147,6 +158,18 @@ int get_tokens(int *out_len, char ***out_array) {
 				state = START;
 				break;
 			}
+			break;
+		case CMP_OP:
+			if(ch == '=') {
+				token[token_index++] = ch;
+			} else {
+				CHECK_UNGETC(ch);
+			}
+			(*out_array)[array_index] = strdup(token);
+			if((*out_array)[array_index++] == NULL) return ERR_MEM;
+			bzero(token, sizeof(token) / sizeof(*token));
+			token_index = 0;
+			state = START;
 			break;
 		case NUMBER_OP:
 			if(ch >= '0' && ch <= '9') {
