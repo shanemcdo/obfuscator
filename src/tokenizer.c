@@ -12,6 +12,8 @@ typedef enum {
 	NEWLINE,
 	START,
 	IDENT,
+	AND_OP,
+	OR_OP,
 	CMP_OP,
 	NUMBER_OP,
 	INT,
@@ -89,7 +91,6 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				state = COMMENT;
 				break;
 			case '~':
-			case '|':
 			case '}':
 			case '{':
 			case ']':
@@ -118,6 +119,14 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			case '\'':
 				token[token_index++] = ch;
 				state = CHAR;
+				break;
+			case '&':
+				token[token_index++] = ch;
+				state = AND_OP;
+				break;
+			case '|':
+				token[token_index++] = ch;
+				state = OR_OP;
 				break;
 			case '=':
 			case '>':
@@ -166,6 +175,31 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				state = START;
 				break;
 			}
+			break;
+		case AND_OP:
+			if(ch == '&') {
+				token[token_index++] = ch;
+			} else {
+				CHECK_UNGETC(ch);
+			}
+			(*out_array)[array_index] = strdup(token);
+			if((*out_array)[array_index++] == NULL) return ERR_MEM;
+			bzero(token, sizeof(token) / sizeof(*token));
+			token_index = 0;
+			state = START;
+			break;
+		case OR_OP:
+			if(ch == '|') {
+				token[token_index++] = ch;
+			} else {
+				CHECK_UNGETC(ch);
+			}
+			(*out_array)[array_index] = strdup(token);
+			if((*out_array)[array_index++] == NULL) return ERR_MEM;
+			bzero(token, sizeof(token) / sizeof(*token));
+			token_index = 0;
+			state = START;
+			break;
 			break;
 		case CMP_OP:
 			if(ch == '=') {
