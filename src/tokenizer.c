@@ -14,6 +14,8 @@ typedef enum {
 	FLOAT,
 	STRING,
 	STRING_ESCAPE,
+	CHAR,
+	CHAR_ESCAPE,
 	COMMENT,
 	IGNORE_LINE,
 	// TODO: handle multi-line comments
@@ -96,10 +98,12 @@ int get_tokens(int *out_len, char ***out_array) {
 				state = IDENT;
 				break;
 			case '"':
-			case '\'':
 				token[token_index++] = ch;
 				state = STRING;
 				break;
+			case '\'':
+				token[token_index++] = ch;
+				state = CHAR;
 				break;
 			case '-':
 			case '+':
@@ -232,6 +236,35 @@ int get_tokens(int *out_len, char ***out_array) {
 			default:
 				token[token_index++] = ch;
 				state = STRING;
+				break;
+			}
+			break;
+		case CHAR:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			case '\'':
+				token[token_index++] = ch;
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			case '\\':
+				state = CHAR_ESCAPE;
+			default:
+				token[token_index++] = ch;
+				break;
+			}
+			break;
+		case CHAR_ESCAPE:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			default:
+				token[token_index++] = ch;
+				state = CHAR;
 				break;
 			}
 			break;
