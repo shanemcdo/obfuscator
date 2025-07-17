@@ -24,5 +24,5 @@ int main(int argc, char **argv){
 	}
 	free(tokens);
 	free(macros);
-    return 0;
+	return 0;
 }
