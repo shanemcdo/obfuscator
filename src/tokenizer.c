@@ -98,6 +98,7 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			case '(':
 			case ')':
 			case '.':
+			case '?':
 				token[token_index] = ch;
 				(*out_array)[array_index] = strdup(token);
 				if((*out_array)[array_index++] == NULL) return ERR_MEM;
