@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include"tokenizer.h"
+#include"id_gens.h"
 
 int main(int argc, char **argv){
 	if(argc > 1) {
@@ -10,6 +11,11 @@ int main(int argc, char **argv){
 			return 1;
 		}
 	}
+
+	for(int i = 0; i < 10; i++){
+		printf("%d: %s\n", i, id_gen_e());
+	}
+
 	int size = 0;
 	char **tokens = NULL;
 	char *macros = NULL;
