@@ -4,16 +4,21 @@
 #include"tokenizer.h"
 #include"id_gens.h"
 
+int find(char *target, char **array, int size) {
+	for(int i = 0; i < size && array[i] != NULL; i++) {
+		if(strcmp(target, array[i]) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 int main(int argc, char **argv){
 	if(argc > 1) {
 		if(freopen(argv[1], "r", stdin) == NULL) {
 			fprintf(stderr, "Fatal Error: Couldn't open file '%s'\n", argv[1]);
 			return 1;
 		}
-	}
-
-	for(int i = 0; i < 10; i++){
-		printf("%d: %s\n", i, id_gen_e());
 	}
 
 	int size = 0;
@@ -24,11 +29,44 @@ int main(int argc, char **argv){
 		fprintf(stderr, "Fatal Error: Couldn't get tokens. Error code: %d\n", result);
 		return result;
 	}
-	printf("macros: %lu\n%s", strlen(macros), macros);
+	fputs(macros, stdout);
+
+	char **unique = calloc(size, sizeof(*unique));
+	if(unique == NULL) return 1;
+	char **new_ids = calloc(size, sizeof(*new_ids));
+	if(new_ids == NULL) return 1;
+	int new_ids_index = 0;
+
 	for(int i = 0; i < size; i++) {
-		printf("%d: '%s'\n", i, tokens[i]);
+		// printf("%d: '%s'\n", i, tokens[i]);
+		int index = find(tokens[i], unique, size);
+		if(index == -1) {
+			unique[new_ids_index] = tokens[i];
+			new_ids[new_ids_index] = strdup(id_gen_e());
+			if(new_ids[new_ids_index] == NULL) return 1;
+			index = new_ids_index++;
+		}
+	}
+
+	for(int i = 0; i < size && unique[i] != NULL; i++) {
+		printf("#define %s %s\n", new_ids[i], unique[i]);
+	}
+
+	for(int i = 0; i < size; i++) {
+		int index = find(tokens[i], unique, size);
+		if(index < 0) return 3;
+		printf("%s%s", i == 0 ? "" : " ", new_ids[index]);
+	}
+
+	for(int i = 0; i < size; i++) {
+		free(tokens[i]);
 	}
 	free(tokens);
 	free(macros);
+	free(unique);
+	for(int i = 0; i < size && new_ids[i] != NULL; i++) {
+		free(new_ids[i]);
+	}
+	free(new_ids);
 	return 0;
 }
