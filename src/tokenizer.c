@@ -107,6 +107,7 @@ int get_tokens(int *out_len, char ***out_array) {
 			case '0'...'9':
 				token[token_index++] = ch;
 				state = INT;
+				break;
 			case '\r':
 			case '\n':
 				state = NEWLINE;
@@ -158,6 +159,27 @@ int get_tokens(int *out_len, char ***out_array) {
 			state = START;
 			break;
 		case INT:
+			switch(ch){
+			case '.':
+				state = FLOAT;
+			case '0'...'9':
+				token[token_index++] = ch;
+				break;
+			case 'a'...'z':
+			case 'A'...'Z':
+			case '_':
+				return ERR_PAR;
+			case EOF:
+				break;
+			default:
+				CHECK_UNGETC(ch);
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			}
 			break;
 		case FLOAT:
 			break;
