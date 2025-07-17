@@ -17,8 +17,9 @@ typedef enum {
 	CHAR,
 	CHAR_ESCAPE,
 	COMMENT,
+	MULTILINE_COMMENT,
+	MULTILINE_COMMENT_END,
 	IGNORE_LINE,
-	// TODO: handle multi-line comments
 } State;
 
 // return 0 if success
@@ -274,16 +275,42 @@ int get_tokens(int *out_len, char ***out_array) {
 			break;
 		case COMMENT:
 			switch(ch){
+			case EOF:
+				return ERR_PAR;
 			case '/':
 				state = IGNORE_LINE;
+				break;
+			case '*':
+				state = MULTILINE_COMMENT;
 				break;
 			default:
 				CHECK_UNGETC(ch);
 				(*out_array)[array_index] = strdup(token);
 				if((*out_array)[array_index++] == NULL) return ERR_MEM;
-				bzero(token, sizeof(token) / sizeof(*token));
-				token_index = 0;
 				state = START;
+				break;
+			}
+			bzero(token, sizeof(token) / sizeof(*token));
+			token_index = 0;
+			break;
+		case MULTILINE_COMMENT:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			case '*':
+				state = MULTILINE_COMMENT_END;
+				break;
+			}
+			break;
+		case MULTILINE_COMMENT_END:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			case '/':
+				state = START;
+				break;
+			default:
+				state = MULTILINE_COMMENT;
 				break;
 			}
 			break;
