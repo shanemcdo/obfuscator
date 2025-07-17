@@ -218,6 +218,8 @@ int get_tokens(int *out_len, char ***out_array) {
 			break;
 		case STRING:
 			switch(ch){
+			case '\r':
+			case '\n':
 			case EOF:
 				return ERR_PAR;
 			case '"':
@@ -247,6 +249,8 @@ int get_tokens(int *out_len, char ***out_array) {
 			break;
 		case CHAR:
 			switch(ch){
+			case '\r':
+			case '\n':
 			case EOF:
 				return ERR_PAR;
 			case '\'':
