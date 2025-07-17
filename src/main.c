@@ -7,8 +7,5 @@ int main(int argc, char **argv){
 			return 1;
 		}
 	}
-	char str[10] = "";
-	fgets(str, sizeof(str) / sizeof(*str), stdin);
-	printf("str = %s\n", str);
     return 0;
 }
