@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
 #include"tokenizer.h"
 
@@ -21,6 +22,7 @@ int main(int argc, char **argv){
 	for(int i = 0; i < size; i++) {
 		printf("%d: '%s'\n", i, tokens[i]);
 	}
-
+	free(tokens);
+	free(macros);
     return 0;
 }
