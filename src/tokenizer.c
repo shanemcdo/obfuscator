@@ -16,6 +16,7 @@ typedef enum {
 	STRING_ESCAPE,
 	COMMENT,
 	IGNORE_LINE,
+	// TODO: handle multi-line comments
 } State;
 
 // return 0 if success
@@ -55,6 +56,7 @@ int get_tokens(int *out_len, char ***out_array) {
 				state = COMMENT;
 				break;
 			case '#':
+				// TODO: handle saving these lines
 				state = IGNORE_LINE;
 				break;
 			case ' ':
