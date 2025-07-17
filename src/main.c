@@ -20,6 +20,7 @@ int main(int argc, char **argv){
 			return 1;
 		}
 	}
+	IDGen get_id = id_gen_e; // TODO: add args to make this swapable
 
 	int size = 0;
 	char **tokens = NULL;
@@ -42,7 +43,11 @@ int main(int argc, char **argv){
 		int index = find(tokens[i], unique, size);
 		if(index == -1) {
 			unique[new_ids_index] = tokens[i];
-			new_ids[new_ids_index] = strdup(id_gen_e());
+			char *new_id = NULL;
+			do {
+				new_id = get_id();
+			} while(find(new_id, tokens, size) != -1);
+			new_ids[new_ids_index] = strdup(new_id);
 			if(new_ids[new_ids_index] == NULL) return 1;
 			index = new_ids_index++;
 		}
