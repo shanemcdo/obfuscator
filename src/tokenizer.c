@@ -15,7 +15,11 @@ typedef enum {
 	IDENT,
 	AND_OP,
 	OR_OP,
-	CMP_OP,
+	LT_OP,
+	GT_OP,
+	EQ_OP,
+	LBS_OP,
+	RBS_OP,
 	NUMBER_OP,
 	INT,
 	FLOAT,
@@ -134,12 +138,18 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				token[token_index++] = ch;
 				state = OR_OP;
 				break;
-			case '=':
-			case '>':
-			case '<':
 			case '!':
+			case '=':
 				token[token_index++] = ch;
-				state = CMP_OP;
+				state = EQ_OP;
+				break;
+			case '>':
+				token[token_index++] = ch;
+				state = GT_OP;
+				break;
+			case '<':
+				token[token_index++] = ch;
+				state = LT_OP;
 				break;
 			case '-':
 			case '+':
@@ -179,7 +189,7 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			}
 			break;
 		case AND_OP:
-			if(ch == '&') {
+			if(ch == '&' || ch == '=') {
 				token[token_index++] = ch;
 			} else {
 				CHECK_UNGETC(ch);
@@ -191,7 +201,7 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			state = START;
 			break;
 		case OR_OP:
-			if(ch == '|') {
+			if(ch == '|' || ch == '=') {
 				token[token_index++] = ch;
 			} else {
 				CHECK_UNGETC(ch);
@@ -202,8 +212,57 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			token_index = 0;
 			state = START;
 			break;
+		case LT_OP:
+			switch(ch) {
+			case '<':
+				token[token_index++] = ch;
+				state = LBS_OP;
+				break;
+			case '=':
+				token[token_index++] = ch;
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			default:
+				CHECK_UNGETC(ch);
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			}
 			break;
-		case CMP_OP:
+		case GT_OP:
+			switch(ch) {
+			case '>':
+				token[token_index++] = ch;
+				state = RBS_OP;
+				break;
+			case '=':
+				token[token_index++] = ch;
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			default:
+				CHECK_UNGETC(ch);
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				state = START;
+				break;
+			}
+			break;
+		case EQ_OP:
+		case RBS_OP:
+		case LBS_OP:
 			if(ch == '=') {
 				token[token_index++] = ch;
 			} else {
