@@ -163,6 +163,7 @@ int get_tokens(int *out_len, char ***out_array) {
 				break;
 			case '$':
 			default:
+				fprintf(stderr, "Parsing Error: state START, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			}
 			break;
@@ -305,6 +306,7 @@ int get_tokens(int *out_len, char ***out_array) {
 			case 'a'...'z':
 			case 'A'...'Z':
 			case '_':
+				fprintf(stderr, "Parsing Error: state INT, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case EOF:
 				break;
@@ -327,6 +329,7 @@ int get_tokens(int *out_len, char ***out_array) {
 			case 'a'...'z':
 			case 'A'...'Z':
 			case '_':
+				fprintf(stderr, "Parsing Error: state FLOAT, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case EOF:
 				break;
@@ -345,6 +348,7 @@ int get_tokens(int *out_len, char ***out_array) {
 			case '\r':
 			case '\n':
 			case EOF:
+				fprintf(stderr, "Parsing Error: state STRING, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case '"':
 				token[token_index++] = ch;
@@ -364,6 +368,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case STRING_ESCAPE:
 			switch(ch){
 			case EOF:
+				fprintf(stderr, "Parsing Error: state STRING_ESCAPE, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			default:
 				token[token_index++] = ch;
@@ -376,6 +381,7 @@ int get_tokens(int *out_len, char ***out_array) {
 			case '\r':
 			case '\n':
 			case EOF:
+				fprintf(stderr, "Parsing Error: state CHAR, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case '\'':
 				token[token_index++] = ch;
@@ -395,6 +401,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case CHAR_ESCAPE:
 			switch(ch){
 			case EOF:
+				fprintf(stderr, "Parsing Error: state CHARE_ESCAPE, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			default:
 				token[token_index++] = ch;
@@ -425,6 +432,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case MACRO_ESCAPE:
 			switch(ch){
 			case EOF:
+				fprintf(stderr, "Parsing Error: state MACRO_ESCAPE, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			default:
 				token[token_index++] = ch;
@@ -434,6 +442,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case COMMENT:
 			switch(ch){
 			case EOF:
+				fprintf(stderr, "Parsing Error: state COMMENT, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case '/':
 				state = IGNORE_LINE;
@@ -454,6 +463,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case MULTILINE_COMMENT:
 			switch(ch){
 			case EOF:
+				fprintf(stderr, "Parsing Error: state MULTILINE_COMMENT, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case '*':
 				state = MULTILINE_COMMENT_END;
@@ -463,6 +473,7 @@ int get_tokens(int *out_len, char ***out_array) {
 		case MULTILINE_COMMENT_END:
 			switch(ch){
 			case EOF:
+				fprintf(stderr, "Parsing Error: state MULTILINE_COMMENT_END, ch=%d(%c)\n", ch, ch);
 				return ERR_PAR;
 			case '/':
 				state = START;
