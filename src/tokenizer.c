@@ -7,7 +7,6 @@
 
 // TODO: KNOWN BUG: Macros will not work correcty when there are #ifdefs in the code
 // TODO: KNOWN BUG: Name collisions can occur with already existing names in #define macros
-// TODO: KNOWN BUG: Function-like macros will not work because there cannot be a space between name and PAREN
 
 typedef enum {
 	NEWLINE,
@@ -179,7 +178,11 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			case EOF: // TODO: might be unnecessiary
 				break;
 			default:
-				CHECK_UNGETC(ch);
+				if(ch == '(') {
+					token[token_index++] = ch;
+				} else {
+					CHECK_UNGETC(ch);
+				}
 				(*out_array)[array_index] = strdup(token);
 				if((*out_array)[array_index++] == NULL) return ERR_MEM;
 				bzero(token, sizeof(token) / sizeof(*token));
