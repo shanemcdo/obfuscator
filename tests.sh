@@ -81,8 +81,19 @@ run_test
 cat > "$INPUT_FILE" <<EOF
 #define add(a, b) ((a) + (b))
 add(1, 2)
+sub(1, 2)
 EOF
-cp "$INPUT_FILE" "$EXPECTED_FILE"
+cat > "$EXPECTED_FILE" <<EOF
+#define e sub
+#define ee (
+#define eee 1
+#define eeee ,
+#define eeeee 2
+#define eeeeee )
+#define add(a, b) ((a) + (b))
+add(1, 2)
+e ee eee eeee eeeee eeeeee
+EOF
 run_test
 
 echo "\n$fail_count failed tests"
