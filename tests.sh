@@ -8,10 +8,11 @@ fail_count=0
 
 run_test() {
 	bin/test "$INPUT_FILE" > "$ACTUAL_FILE"
-	diff="$(diff "$ACTUAL_FILE" "$EXPECTED_FILE")"
 	rc="$?"
+	diff="$(diff "$ACTUAL_FILE" "$EXPECTED_FILE")"
 	if [ -n "$diff" ]; then
 		(( fail_count ++ ))
+		echo "########################################"
 		echo "Test Failed with code $rc"
 		echo "----------------------------------------"
 		cat "$INPUT_FILE"
@@ -65,6 +66,23 @@ cat > "$EXPECTED_FILE" <<EOF
 e ee eee eeee eeeee
 #endif
 EOF
+run_test
+
+cat > "$INPUT_FILE" <<EOF
+#ident abc
+#define add(a, b) ((a) + (b))
+#ifndef puts
+#define puts(x) (printf("%s\\n", x))
+#endif
+EOF
+cp "$INPUT_FILE" "$EXPECTED_FILE"
+run_test
+
+cat > "$INPUT_FILE" <<EOF
+#define add(a, b) ((a) + (b))
+add(1, 2)
+EOF
+cp "$INPUT_FILE" "$EXPECTED_FILE"
 run_test
 
 echo "\n$fail_count failed tests"
