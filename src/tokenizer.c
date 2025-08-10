@@ -435,6 +435,7 @@ int get_tokens(int *out_len, char ***out_array) {
 				state = MACRO;
 				break;
 			}
+			break;
 		case COMMENT:
 			switch(ch){
 			case EOF:
