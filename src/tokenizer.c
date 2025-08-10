@@ -28,6 +28,7 @@ typedef enum {
 	CHAR,
 	CHAR_ESCAPE,
 	MACRO,
+	MACRO_ESCAPE,
 	COMMENT,
 	MULTILINE_COMMENT,
 	MULTILINE_COMMENT_END,
@@ -48,21 +49,18 @@ typedef enum {
 // 5 - ungetc error
 #define ERR_UGC 5
 #define CHECK_UNGETC(ch) ({ if(ungetc(ch, stdin) == EOF) return ERR_UGC; })
-int get_tokens(int *out_len, char ***out_array, char **out_macros) {
-	if(out_array == NULL || out_len == NULL || out_macros == NULL) return ERR_NUL;
+int get_tokens(int *out_len, char ***out_array) {
+	if(out_array == NULL || out_len == NULL) return ERR_NUL;
 	if(*out_array == NULL) {
 		*out_len = 20;
 		*out_array = calloc(*out_len, sizeof(*out_array));
 		if(*out_array == NULL) return ERR_MEM;
 	}
-	int macros_cap = 100;
-	*out_macros = calloc(macros_cap, sizeof(**out_macros));
 	State state = NEWLINE;
 	char token[MAX_TOKEN_SIZE + 1];
 	bzero(token, sizeof(token) / sizeof(*token));
 	int token_index = 0;
 	int array_index = 0;
-	int macros_index = 0;
 	while(1) {
 		if(token_index > MAX_TOKEN_SIZE) return ERR_TOK;
 		int ch = getchar();
@@ -74,7 +72,7 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 				state = COMMENT;
 				break;
 			case '#':
-				(*out_macros)[macros_index++] = ch;
+				token[token_index++] = ch;
 				state = MACRO;
 				break;
 			case ' ':
@@ -411,11 +409,28 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			case '\n':
 			case '\r':
 				state = NEWLINE;
+				token[token_index++] = ch;
+				(*out_array)[array_index] = strdup(token);
+				if((*out_array)[array_index++] == NULL) return ERR_MEM;
+				bzero(token, sizeof(token) / sizeof(*token));
+				token_index = 0;
+				break;
+			case '\\':
+				state = MACRO_ESCAPE;
 			default:
-				(*out_macros)[macros_index++] = ch;
+				token[token_index++] = ch;
 				break;
 			}
 			break;
+		case MACRO_ESCAPE:
+			switch(ch){
+			case EOF:
+				return ERR_PAR;
+			default:
+				token[token_index++] = ch;
+				state = MACRO;
+				break;
+			}
 		case COMMENT:
 			switch(ch){
 			case EOF:
@@ -474,17 +489,9 @@ int get_tokens(int *out_len, char ***out_array, char **out_macros) {
 			*out_array = realloc(*out_array, sizeof(*out_array) * *out_len);
 			if(*out_array == NULL) return ERR_MEM;
 		}
-		if(macros_index + 1 >= macros_cap) {
-			macros_cap *= 2;
-			*out_macros = realloc(*out_macros, sizeof(*out_macros) * macros_cap);
-			if(*out_array == NULL) return ERR_MEM;
-		}
 	}
 	*out_len = array_index;
 	*out_array = realloc(*out_array, sizeof(**out_array) * *out_len);
 	if(*out_array == NULL) return ERR_MEM;
-	*out_macros = realloc(*out_macros, sizeof(**out_macros) * macros_index);
-	if(*out_macros == NULL) return ERR_MEM;
-	(*out_macros)[macros_index] = '\0';
 	return SUCCESS;
 }

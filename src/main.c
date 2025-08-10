@@ -25,13 +25,11 @@ int main(int argc, char **argv){
 
 	int size = 0;
 	char **tokens = NULL;
-	char *macros = NULL;
-	int result = get_tokens(&size, &tokens, &macros);
+	int result = get_tokens(&size, &tokens);
 	if(result != 0) {
 		fprintf(stderr, "Fatal Error: Couldn't get tokens. Error code: %d\n", result);
 		return result;
 	}
-	fputs(macros, stdout);
 
 	char **unique = calloc(size, sizeof(*unique));
 	if(unique == NULL) return 1;
@@ -41,7 +39,7 @@ int main(int argc, char **argv){
 
 	for(int i = 0; i < size; i++) {
 		// printf("%d: '%s'\n", i, tokens[i]);
-		if(tokens[i][0] == '\n' || tokens[i][0] == '\r') continue;
+		if(tokens[i][0] == '\n' || tokens[i][0] == '\r' || tokens[i][0] == '#') continue;
 		int index = find(tokens[i], unique, size);
 		if(index == -1) {
 			unique[new_ids_index] = tokens[i];
@@ -61,8 +59,8 @@ int main(int argc, char **argv){
 
 	bool newline = true;
 	for(int i = 0; i < size; i++) {
-		if(tokens[i][0] == '\n' || tokens[i][0] == '\r') {
-			putchar('\n');
+		if(tokens[i][0] == '\n' || tokens[i][0] == '\r' || tokens[i][0] == '#') {
+			fputs(tokens[i], stdout);
 			continue;
 		}
 		int index = find(tokens[i], unique, size);
@@ -75,7 +73,6 @@ int main(int argc, char **argv){
 		free(tokens[i]);
 	}
 	free(tokens);
-	free(macros);
 	free(unique);
 	for(int i = 0; i < size && new_ids[i] != NULL; i++) {
 		free(new_ids[i]);
