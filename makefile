@@ -6,8 +6,11 @@ DBGR=lldb
 
 all: $(TARGET)
 
-test: $(TARGET)
+run: $(TARGET)
 	$(TARGET)
+
+test: $(TARGET)
+	./tests.sh
 
 debug: CFLAGS+=-g
 debug: TARGET=bin/debug
@@ -31,4 +34,4 @@ bin:
 clean:
 	$(RM) bin
 
-.PHONY: all test debug release clean
+.PHONY: all run test debug release clean
